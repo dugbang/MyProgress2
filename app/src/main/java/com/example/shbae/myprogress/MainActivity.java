@@ -2,7 +2,9 @@ package com.example.shbae.myprogress;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -12,6 +14,10 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     Handler handler = new Handler();
+
+    CompletionThread completionThread;
+
+    String msg = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +36,14 @@ public class MainActivity extends AppCompatActivity {
                         ProgressThread thread = new ProgressThread();
                         thread.start();
                     }
-                }, 5000);
+                }, 3000);
                 //ProgressThread thread = new ProgressThread();
                 //thread.start();
             }
         });
+
+        completionThread = new CompletionThread();
+        completionThread.start();
     }
 
     class ProgressThread extends Thread {
@@ -47,19 +56,37 @@ public class MainActivity extends AppCompatActivity {
 
                 value += 1;
 
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         progressBar.setProgress(value);
                     }
                 });
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+
+            completionThread.completionHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    msg = "OK";
+
+                    Log.d("MainActivity", "메시지: " + msg);
+                }
+            });
+        }
+    }
+
+    class CompletionThread extends Thread {
+        public Handler completionHandler = new Handler();
+
+        public void run() {
+            Looper.prepare();
+            Looper.loop();
         }
     }
 }
