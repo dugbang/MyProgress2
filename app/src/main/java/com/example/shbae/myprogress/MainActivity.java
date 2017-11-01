@@ -1,5 +1,6 @@
 package com.example.shbae.myprogress;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                /*
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -39,11 +42,54 @@ public class MainActivity extends AppCompatActivity {
                 }, 3000);
                 //ProgressThread thread = new ProgressThread();
                 //thread.start();
+                */
+
+                ProgressTask task = new ProgressTask();
+                task.execute("시작");
+
             }
         });
 
         completionThread = new CompletionThread();
         completionThread.start();
+    }
+
+    class ProgressTask extends AsyncTask<String, Integer, Integer> {
+        int value = 0;
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+            while(true) {
+                if (value > 100)
+                    break;
+
+                value += 1;
+
+                publishProgress(value);
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return value;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+
+            progressBar.setProgress(values[0].intValue());
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+
+            Toast.makeText(getApplicationContext(), "완료됨", Toast.LENGTH_LONG).show();
+        }
     }
 
     class ProgressThread extends Thread {
